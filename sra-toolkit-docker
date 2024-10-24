@@ -1,0 +1,15 @@
+# Base image
+FROM ubuntu:latest
+
+# Install necessary dependencies including SRA Toolkit
+RUN apt-get update && \
+    apt-get install -y sra-toolkit curl
+
+# Add SRA Toolkit binaries to PATH (just in case it’s not in PATH automatically)
+ENV PATH="/usr/bin:${PATH}"
+
+# Check if fasterq-dump is working
+RUN fasterq-dump --version
+
+# Set default command to bash
+CMD ["/bin/bash"]
