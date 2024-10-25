@@ -1,0 +1,24 @@
+#image de base
+FROM python:3.6-slim
+
+#installe cutadapt version 1.1
+RUN apt-get update && \
+    apt-get install -y gcc build-essential libpython3-dev && \
+    apt-get clean
+
+RUN pip install cutadapt==1.11
+#installation check
+RUN cutadapt --version
+
+#commande par défaut bash
+CMD ["/bin/bash"]
+
+#Pour construire l'image faire :
+#docker build -f cutadapt-docker -t cutadapt-docker .
+
+#lancer un conteneur interactif, car cutadapt dispo seulement dans le conteneur, à l'aide de 
+#l'image Docker cutadapt-docker :
+#docker run -it cutadapt-docker  
+#puis cutadapt -version pour vérifier si fonctionnel
+#docu cut adapt : https://cutadapt.readthedocs.io/en/v1.11/installation.html
+
