@@ -18,9 +18,10 @@ CMD ["/bin/bash"]
 #Pour construire l'image faire :
 #docker build -f cutadapt-docker -t cutadapt-docker .
 
-#lancer un conteneur interactif, car cutadapt dispo seulement dans le conteneur, à l'aide de 
+#lancer un conteneur interactif, car cutadapt dispo 
+#seulement dans le conteneur, à l'aide de 
 #l'image Docker cutadapt-docker :
 #docker run -it cutadapt-docker  
 #puis cutadapt -version pour vérifier si fonctionnel
-#docu cut adapt : https://cutadapt.readthedocs.io/en/v1.11/installation.html
+#docu: https://cutadapt.readthedocs.io/en/v1.11/installation.html
 
