@@ -1,27 +1,22 @@
-#image de base
-FROM python:3.6-slim
+#utiliser une image de base Ubuntu 18.04 car compatible avec python 3.6 car les dernières non
+FROM ubuntu:18.04
 
-#installe cutadapt version 1.1
-RUN apt-get update && \
-    apt-get install -y gcc build-essential libpython3-dev && \
-    apt-get clean
+#installation des dépendances nécessaires dont python 3.6 et gcc nécessaires et compatible avec cutadapt 1.11
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    python3.6 \
+    python3.6-dev \
+    python3-pip \
+    python3-setuptools \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN pip install cutadapt==1.11
-#installation check
+#installation de cutadapt
+RUN pip3 install cutadapt==1.11
+
+
+#vérifier l'installation de Cutadapt
 RUN cutadapt --version
 
-ENV PATH="/usr/bin:${PATH}"
-
-#commande par défaut bash
+#entrée par défaut
 CMD ["/bin/bash"]
-
-#Pour construire l'image faire :
-#docker build -f cutadapt-docker -t cutadapt-docker .
-
-#lancer un conteneur interactif, car cutadapt dispo 
-#seulement dans le conteneur, à l'aide de 
-#l'image Docker cutadapt-docker :
-#docker run -it cutadapt-docker  
-#puis cutadapt -version pour vérifier si fonctionnel
-#docu: https://cutadapt.readthedocs.io/en/v1.11/installation.html
-
