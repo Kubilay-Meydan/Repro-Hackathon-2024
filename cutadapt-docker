@@ -10,6 +10,8 @@ RUN pip install cutadapt==1.11
 #installation check
 RUN cutadapt --version
 
+ENV PATH="/usr/bin:${PATH}"
+
 #commande par défaut bash
 CMD ["/bin/bash"]
 
