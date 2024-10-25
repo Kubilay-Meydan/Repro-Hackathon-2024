@@ -1,7 +1,9 @@
-#utiliser une image de base Ubuntu 18.04 car compatible avec python 3.6 car les dernières non
+#utiliser une image de base Ubuntu 18.04 car 
+#compatible avec python 3.6 car les dernières non
 FROM ubuntu:18.04
 
-#installation des dépendances nécessaires dont python 3.6 et gcc nécessaires et compatible avec cutadapt 1.11
+#installation des dépendances nécessaires dont python 
+#3.6 et gcc nécessaires et compatible avec cutadapt 1.11
 RUN apt-get update && apt-get install -y \
     build-essential \
     python3.6 \
