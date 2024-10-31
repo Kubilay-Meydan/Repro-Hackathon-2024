@@ -1,33 +1,59 @@
 #!/usr/bin/env nextflow
+nextflow.enable.dsl=2
 
 // Define a list of SRR numbers to download
-def SRR_LIST = Channel.of("SRR10379721", "SRR10379722", "SRR10379723", "SRR10379724", "SRR10379725", "SRR10379726")
+workflow {
+    // List of SRR IDs as a channel
+    def SRR_LIST = Channel.of("SRR10379721", "SRR10379722", "SRR10379723", "SRR10379724", "SRR10379725", "SRR10379726")
 
-// Define a process to download a single FASTQ file using fasterq-dump
+    // Run downloadFastq and store output in fastq_files channel
+    fastq_files = downloadFastq(SRR_LIST)
+
+    // Pass fastq_files to trimReads
+    trimmed_files = trimReads(fastq_files)
+
+    // Display or save trimmed files as needed
+    trimmed_files.view()
+}
+
+// Process to download and gzip FASTQ files using SRA Toolkit
 process downloadFastq {
-
-    // Input each SRR ID directly from the channel
+    container 'sra-toolkit-docker'
+    
     input:
     val srr_id
 
-    // Output each downloaded file to the fastq_files directory
     output:
-    path "fastq_files/${srr_id}.fastq"
+    path "fastq_files/${srr_id}.fastq.gz"
 
-    // Script to download FASTQ file for each SRR ID
     script:
     """
-    # Create output directory
     mkdir -p fastq_files
-
-    # Download FASTQ file for the given SRR ID
-    echo "Starting download for ${srr_id}..."
-    fasterq-dump ${srr_id} --split-spot --skip-technical --outdir fastq_files
-    echo "Finished downloading ${srr_id}."
+    if [ ! -f fastq_files/${srr_id}.fastq.gz ]; then
+        echo "Starting download for ${srr_id}..."
+        fasterq-dump ${srr_id} --split-spot --skip-technical --outdir fastq_files
+        gzip fastq_files/${srr_id}.fastq
+        echo "Finished downloading and gzipping ${srr_id}."
+    else
+        echo "File for ${srr_id} already exists. Skipping download."
+    fi
     """
 }
 
-// Workflow execution
-workflow {
-    downloadFastq(SRR_LIST)
+// Process to trim reads using cutadapt
+process trimReads {
+    container 'cutadapt-docker'
+
+    input:
+    path fastq_file
+
+    output:
+    path "trimmed_reads/${fastq_file.baseName}_trimmed.fastq.gz"
+
+    script:
+    """
+    cutadapt --version
+    mkdir -p trimmed_reads
+    cutadapt -q 20 -m 25 -o trimmed_reads/${fastq_file.baseName}_trimmed.fastq.gz ${fastq_file}
+    """
 }

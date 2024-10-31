@@ -1,9 +1,7 @@
-#utiliser une image de base Ubuntu 18.04 car 
-#compatible avec python 3.6 car les dernières non
+# Use Ubuntu 18.04 as the base image
 FROM ubuntu:18.04
 
-#installation des dépendances nécessaires dont python 
-#3.6 et gcc nécessaires et compatible avec cutadapt 1.11
+# Install dependencies including Python 3.6
 RUN apt-get update && apt-get install -y \
     build-essential \
     python3.6 \
@@ -13,12 +11,14 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-#installation de cutadapt
+# Install cutadapt 1.11
 RUN pip3 install cutadapt==1.11
 
+# Add /usr/local/bin to PATH where pip installs executables by default
+ENV PATH="/usr/local/bin:${PATH}"
 
-#vérifier l'installation de Cutadapt
-RUN cutadapt --version
+# Verify cutadapt installation and path
+RUN which cutadapt && cutadapt --version
 
-#entrée par défaut
+# Default entry point
 CMD ["/bin/bash"]
