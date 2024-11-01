@@ -9,6 +9,9 @@ workflow {
     // Run downloadFastq and store output in fastq_files channel
     fastq_files = downloadFastq(SRR_LIST)
 
+    // Download reference genome
+    reference_fasta = downloadReference()
+
     // Pass fastq_files to trimReads
     trimmed_files = trimReads(fastq_files)
 
@@ -37,6 +40,21 @@ process downloadFastq {
     else
         echo "File for ${srr_id} already exists. Skipping download."
     fi
+    """
+}
+
+// Process to download reference genome
+process downloadReference{
+    // si wget dispo sur sra-toolkit
+    container "sra-toolkit_docker"
+
+    output:
+    path "reference/reference.fasta"
+
+    script:
+    """
+    mkdir -p reference
+    wget -q -O reference/reference.fasta "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=CP000253.1&rettype=fasta"
     """
 }
 
