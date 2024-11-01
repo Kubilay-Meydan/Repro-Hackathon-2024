@@ -1,0 +1,44 @@
+#Utiliser Ubuntu 18.04 avec plateforme x86_64 qui est compatible
+#avec la version bowtie de linux x86_64
+FROM ubuntu:18.04
+
+#installer les dépendances nécessaires (wget et unzip non natif de ubuntu 18.04)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+#télécharger Bowtie à partir du lien sur sourceforge
+RUN wget --timeout=180 -O bowtie-0.12.7-linux-x86_64.zip https://sourceforge.net/projects/bowtie-bio/files/bowtie/0.12.7/bowtie-0.12.7-linux-x86_64.zip/download
+
+#décompresser et placer dans le PATH avec mv
+RUN unzip bowtie-0.12.7-linux-x86_64.zip && \
+    mv bowtie-0.12.7 /bowtie && \
+    ln -s /bowtie/bowtie /usr/local/bin/bowtie
+
+#ajouter Bowtie au PATH
+ENV PATH="/bowtie-0.12.7:${PATH}"
+
+#vérification de l'installation au sein du conatainer
+RUN bowtie --version
+
+#important d'utiliser la commande en dessous car permetd de forcer
+#Docker à utiliser une architecture amd64 (x86_64), 
+#compatible avec le binaire Bowtie que vous avez téléchargé et ne posant pas 
+#de problème avec l'architecture ARM de Mac par exemple...
+
+#SUPER, MERCI MAC POUR LA COMPATIBILITÉ PAS INCROYABLE
+#La commande :
+
+#docker build --platform=linux/amd64 -f bowtie-docker -t bowtie-docker .
+
+
+
+#Vérifier installation de bowtie à l'intérieur du container :
+
+#docker run --platform=linux/amd64 -it bowtie-docker /bin/bash
+#bowtie --version 
+
+#commande d'entrée par défaut (à ajuster selon les besoins)
+CMD ["/bin/bash"]
