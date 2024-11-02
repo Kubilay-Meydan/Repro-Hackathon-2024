@@ -9,14 +9,17 @@ workflow {
     // Run downloadFastq and store output in fastq_files channel
     fastq_files = downloadFastq(SRR_LIST)
 
-    // Download reference genome
-    reference_fasta = downloadReference()
-
     // Pass fastq_files to trimReads
     trimmed_files = trimReads(fastq_files)
 
     // Display or save trimmed files as needed
     trimmed_files.view()
+
+    // Run downloadGenome process
+    genome_file = downloadGenome()
+
+    // Run indexGenome process with genome_file as input
+    indexed_genome = indexGenome(genome_file)
 }
 
 // Process to download and gzip FASTQ files using SRA Toolkit
@@ -43,21 +46,6 @@ process downloadFastq {
     """
 }
 
-// Process to download reference genome
-process downloadReference{
-    // si wget dispo sur sra-toolkit
-    container "sra-toolkit_docker"
-
-    output:
-    path "reference/reference.fasta"
-
-    script:
-    """
-    mkdir -p reference
-    wget -q -O reference/reference.fasta "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=CP000253.1&rettype=fasta"
-    """
-}
-
 // Process to trim reads using cutadapt
 process trimReads {
     container 'cutadapt-docker'
@@ -73,5 +61,34 @@ process trimReads {
     cutadapt --version
     mkdir -p trimmed_reads
     cutadapt -q 20 -m 25 -o trimmed_reads/${fastq_file.baseName}_trimmed.fastq.gz ${fastq_file}
+    """
+}
+
+// New process to download genome using wget
+process downloadGenome {
+    container 'bowtie-docker'
+
+    output:
+    path "CP000253.1.fasta"
+
+    script:
+    """
+    wget "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=CP000253.1&rettype=fasta&retmode=text" -O CP000253.1.fasta
+    """
+}
+
+// New process to index genome using Bowtie
+process indexGenome {
+    container 'bowtie-docker'
+
+    input:
+    path genome_fasta
+
+    output:
+    path "CP000253.1.*"
+
+    script:
+    """
+    bowtie-build ${genome_fasta} CP000253.1
     """
 }
