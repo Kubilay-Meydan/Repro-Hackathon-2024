@@ -16,10 +16,16 @@ workflow {
     trimmed_files.view()
 
     // Run downloadGenome process
-    genome_file = downloadGenome()
+    genome_fasta = downloadGenome()
 
-    // Run indexGenome process with genome_file as input
-    indexed_genome = indexGenome(genome_file)
+    // Run indexGenome process with genome_fasta as input
+    indexed_genome_dir = indexGenome(genome_fasta)  // Récupère le dossier de sortie d'index
+
+    // Mapping des lectures avec les fichiers indexés et trimmed
+    mapped_files = mapReads(indexed_genome_dir, trimmed_files)    
+
+    // Afficher les fichiers d'alignement générés
+    mapped_files.view()
 }
 
 // Process to download and gzip FASTQ files using SRA Toolkit
@@ -85,10 +91,30 @@ process indexGenome {
     path genome_fasta
 
     output:
-    path "CP000253.1.*"
+    path "bowtie_index/"
 
     script:
     """
-    bowtie-build ${genome_fasta} CP000253.1
+    mkdir -p bowtie_index
+    bowtie-build ${genome_fasta} bowtie_index/CP000253.1
     """
 }
+
+process mapReads {
+    container 'bowtie-docker'
+
+    input:
+    path indexed_genome_dir // Chemin du dossier contenant les fichiers d'index (bowtie_index)
+    path trimmed_files
+
+    output:
+    path "mapped_reads/${trimmed_files.baseName}.sam"
+
+    script:
+    """
+    mkdir -p mapped_reads
+    zcat ${trimmed_files} | bowtie -q ${indexed_genome_dir}/CP000253.1 --sam - > mapped_reads/${trimmed_files.baseName}.sam
+    """
+}
+
+
