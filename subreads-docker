@@ -1,0 +1,28 @@
+# on utilise Ubuntu 18.04 
+FROM ubuntu:18.04
+
+# installation des dépendances
+RUN apt-get update && apt-get install -y \
+    wget \
+    unzip \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# on telecharge la version 1.4.6-p3 de subread
+RUN wget --timeout=180 -O subread-1.4.6-p3-Linux-x86_64.tar.gz \
+    https://sourceforge.net/projects/subread/files/subread-1.4.6-p3/subread-1.4.6-p3-Linux-x86_64.tar.gz/download
+
+# décompresser et déplacer
+RUN tar -xzf subread-1.4.6-p3-Linux-x86_64.tar.gz && \
+    mv subread-1.4.6-p3-Linux-x86_64 /subread && \
+# création des liens symboliques pour les exécutables
+    ln -s /subread/bin/* /usr/local/bin/ 
+
+# on ajoute le répertoire de subread au PATH 
+ENV PATH="/subread/bin:${PATH}"
+
+# on vérifie l'installation de subread et particulier featurecounts
+RUN featureCounts -v
+
+# commande d'entrée par défaut
+CMD ["/bin/bash"]
