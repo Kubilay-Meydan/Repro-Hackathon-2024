@@ -26,6 +26,12 @@ workflow {
 
     // Afficher les fichiers d'alignement générés
     mapped_files.view()
+
+    // Download genome annote
+    genome_annot = dwnldAnnotationGTF()
+
+    // Mapped file to featureCount
+    feature_count_results = featureCount(mapped_files,genome_annot)
 }
 
 // Process to download and gzip FASTQ files using SRA Toolkit
@@ -114,6 +120,36 @@ process mapReads {
     """
     mkdir -p mapped_reads
     zcat ${trimmed_files} | bowtie -q ${indexed_genome_dir}/CP000253.1 --sam - > mapped_reads/${trimmed_files.baseName}.sam
+    """
+}
+
+process dwnldAnnotationGTF {
+    container 'subreads-docker'
+
+    output:
+    path GCF_000013425.1_ASM1342v1_genomic.gtf
+
+    script:
+    """
+    wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/013/425/GCF_000013425.1_ASM1342v1/GCF_000013425.1_ASM1342v1_genomic.gtf.gz
+    gunzip GCF_000013425.1_ASM1342v1_genomic.gtf.gz
+    """
+}
+
+process featureCount {
+    container 'subreads-docker'
+
+    input:
+    path mapped_file
+    path genome_annot
+
+    output:
+    path "featurecount_files/${mapped_file.baseName}.txt"
+
+    script:
+    """
+    mkdir -p featurecount_files
+    featureCounts -t gene -g ID -s 1 -a ${genome_annot} -O featurecount_files/${mapped_file.baseName}.txt ${mapped_file}
     """
 }
 
