@@ -127,7 +127,7 @@ process dwnldAnnotationGTF {
     container 'subreads-docker'
 
     output:
-    path GCF_000013425.1_ASM1342v1_genomic.gtf
+    path "GCF_000013425.1_ASM1342v1_genomic.gtf"
 
     script:
     """
