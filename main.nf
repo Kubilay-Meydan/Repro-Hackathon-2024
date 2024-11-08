@@ -149,7 +149,7 @@ process featureCount {
     script:
     """
     mkdir -p featurecount_files
-    featureCounts -t gene -g ID -s 1 -a ${genome_annot} -O featurecount_files/${mapped_file.baseName}.txt ${mapped_file}
+    featureCounts -t gene -g ID -s 1 -a ${genome_annot} -o featurecount_files/${mapped_file.baseName}.txt ${mapped_file}
     """
 }
 
