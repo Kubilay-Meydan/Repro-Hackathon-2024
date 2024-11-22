@@ -1,0 +1,49 @@
+ 
+# Utilisation de l'image de base Ubuntu 18.04
+FROM ubuntu:18.04
+
+# Installation des dépendances nécessaires
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    wget \
+    unzip \
+    make \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    gfortran \
+    libreadline-dev \
+    libx11-dev \
+    libxt-dev \
+    xorg-dev \
+    libbz2-dev \
+    liblzma-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Téléchargement et extraction du code source de R
+RUN wget https://cran.r-project.org/src/base/R-3/R-3.4.1.tar.gz && \
+    tar -xzvf R-3.4.1.tar.gz
+
+# Compilation et installation de R
+RUN cd R-3.4.1 && \
+    ./configure && \
+    make && \
+    make install
+
+
+# Installation de BiocManager et du package 'remotes' nécessaire pour BiocArchive
+
+RUN R -e "install.packages('rlang', repos='https://cloud.r-project.org')" && \
+    R -e "install.packages('memoise', repos='https://cloud.r-project.org')" && \
+    R -e "install.packages('rvest', repos='https://cloud.r-project.org')" && \
+    R -e "install.packages('xml2', repos='https://cloud.r-project.org')" && \
+    R -e "install.packages('cachem', repos='https://cloud.r-project.org')"
+
+
+
+RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org')" &&>    R -e "install.packages('remotes', repos='https://cloud.r-project.org')" && \
+    R -e "BiocManager::install('Bioconductor/BiocArchive', ask=FALSE)"
+
+
+# Commande d'entrée par défaut
+CMD ["/bin/bash"]
