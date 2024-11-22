@@ -22,21 +22,21 @@ workflow {
     indexed_genome_dir = indexGenome(genome_fasta)  // Récupère le dossier de sortie d'index
 
     // Mapping des lectures avec les fichiers indexés et trimmed
-    mapped_files = mapReads(indexed_genome_dir, trimmed_files)    
+    mapped_files = mapReads(indexed_genome_dir, trimmed_files)
 
     // Afficher les fichiers d'alignement générés
     mapped_files.view()
 
-    // Download genome annote
+    // Download genome annotation
     genome_annot = dwnldAnnotationGTF()
 
-    // Mapped file to featureCount
-    feature_count_results = featureCount(mapped_files,genome_annot)
+    // Map files to featureCount
+    feature_count_results = featureCount(mapped_files, genome_annot)
 }
 
 // Process to download and gzip FASTQ files using SRA Toolkit
 process downloadFastq {
-    container 'sra-toolkit-docker'
+    container 'kubilaymeydan/sra-toolkit-docker:latest'
     
     input:
     val srr_id
@@ -60,7 +60,7 @@ process downloadFastq {
 
 // Process to trim reads using cutadapt
 process trimReads {
-    container 'cutadapt-docker'
+    container 'kubilaymeydan/cutadapt-docker:latest'
 
     input:
     path fastq_file
@@ -76,9 +76,9 @@ process trimReads {
     """
 }
 
-// New process to download genome using wget
+// Process to download genome using wget
 process downloadGenome {
-    container 'bowtie-docker'
+    container 'kubilaymeydan/bowtie-docker:latest'
 
     output:
     path "GCF_000013425.1_ASM1342v1_genomic.fna"
@@ -90,10 +90,9 @@ process downloadGenome {
     """
 }
 
-
-// New process to index genome using Bowtie
+// Process to index genome using Bowtie
 process indexGenome {
-    container 'bowtie-docker'
+    container 'kubilaymeydan/bowtie-docker:latest'
 
     input:
     path genome_fasta
@@ -109,7 +108,7 @@ process indexGenome {
 }
 
 process mapReads {
-    container 'bowtie-docker'
+    container 'kubilaymeydan/bowtie-docker:latest'
 
     input:
     path indexed_genome_dir // Chemin du dossier contenant les fichiers d'index (bowtie_index)
@@ -126,7 +125,7 @@ process mapReads {
 }
 
 process dwnldAnnotationGTF {
-    container 'subreads-docker'
+    container 'kubilaymeydan/subreads-docker:latest'
 
     output:
     path "GCF_000013425.1_ASM1342v1_genomic.gtf"
@@ -139,7 +138,7 @@ process dwnldAnnotationGTF {
 }
 
 process featureCount {
-    container 'subreads-docker'
+    container 'kubilaymeydan/subreads-docker:latest'
 
     input:
     path mapped_file
@@ -154,5 +153,3 @@ process featureCount {
     featureCounts -t gene -g gene_id -s 1 -a ${genome_annot} -o featurecount_files/${mapped_file.baseName}.txt ${mapped_file}
     """
 }
-
-
