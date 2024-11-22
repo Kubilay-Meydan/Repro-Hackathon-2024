@@ -81,13 +81,15 @@ process downloadGenome {
     container 'bowtie-docker'
 
     output:
-    path "CP000253.1.fasta"
+    path "GCF_000013425.1_ASM1342v1_genomic.fna"
 
     script:
     """
-    wget "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=CP000253.1&rettype=fasta&retmode=text" -O CP000253.1.fasta
+    wget "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/013/425/GCF_000013425.1_ASM1342v1/GCF_000013425.1_ASM1342v1_genomic.fna.gz" -O GCF_000013425.1_ASM1342v1_genomic.fna.gz
+    gunzip GCF_000013425.1_ASM1342v1_genomic.fna.gz
     """
 }
+
 
 // New process to index genome using Bowtie
 process indexGenome {
