@@ -49,7 +49,7 @@ process downloadFastq {
     mkdir -p fastq_files
     if [ ! -f fastq_files/${srr_id}.fastq.gz ]; then
         echo "Starting download for ${srr_id}..."
-        fasterq-dump ${srr_id} --split-spot --skip-technical --outdir fastq_files
+        fasterq-dump ${srr_id} --split-spot --skip-technical --threads ${task.cpus} --outdir fastq_files
         gzip fastq_files/${srr_id}.fastq
         echo "Finished downloading and gzipping ${srr_id}."
     else
@@ -90,38 +90,40 @@ process downloadGenome {
     """
 }
 
-// Process to index genome using Bowtie
+
+// New process to index genome using Bowtie
 process indexGenome {
-    container 'kubilaymeydan/bowtie-docker:latest'
+   container 'bowtie-docker'
 
-    input:
-    path genome_fasta
+   input:
+   path genome_fasta
 
-    output:
-    path "bowtie_index/"
+   output:
+   tuple val(genome_fasta.baseName), path("bowtie_index/")
 
-    script:
-    """
-    mkdir -p bowtie_index
-    bowtie-build ${genome_fasta} bowtie_index/CP000253.1
-    """
+   script:
+   """
+   mkdir -p bowtie_index
+   bowtie-build ${genome_fasta} bowtie_index/${genome_fasta.baseName}
+   """
 }
 
+
 process mapReads {
-    container 'kubilaymeydan/bowtie-docker:latest'
+   container 'bowtie-docker'
 
-    input:
-    path indexed_genome_dir // Chemin du dossier contenant les fichiers d'index (bowtie_index)
-    path trimmed_files
+   input:
+   tuple val(name), path(indexed_genome_dir) // Chemin du dossier contenant les fichiers d'index (bowtie_index)
+   path trimmed_files
 
-    output:
-    path "mapped_reads/${trimmed_files.baseName}.sam"
+   output:
+   path "mapped_reads/${trimmed_files.baseName}.sam"
 
-    script:
-    """
-    mkdir -p mapped_reads
-    zcat ${trimmed_files} | bowtie -q ${indexed_genome_dir}/CP000253.1 --sam - > mapped_reads/${trimmed_files.baseName}.sam
-    """
+   script:
+   """
+   mkdir -p mapped_reads
+   zcat ${trimmed_files} | bowtie -q ${indexed_genome_dir}/${name} -p ${task.cpus} --sam - > mapped_reads/${trimmed_files.baseName}.sam
+   """
 }
 
 process dwnldAnnotationGTF {
@@ -135,7 +137,7 @@ process dwnldAnnotationGTF {
     wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/013/425/GCF_000013425.1_ASM1342v1/GCF_000013425.1_ASM1342v1_genomic.gtf.gz
     gunzip GCF_000013425.1_ASM1342v1_genomic.gtf.gz
     """
-}
+} 
 
 process featureCount {
     container 'kubilaymeydan/subreads-docker:latest'
