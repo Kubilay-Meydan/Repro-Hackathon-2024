@@ -1,49 +1,32 @@
- 
-# Utilisation de l'image de base Ubuntu 18.04
+# Utiliser la bonne version de ubuntu
 FROM ubuntu:18.04
 
-# Installation des dépendances nécessaires
-RUN apt-get update && apt-get install -y \
-    build-essential \
+#Eviter les interactions lors de l'installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Installation des dependences et de R
+RUN apt-get update && \
+    apt-get install -y \
+    software-properties-common \
+    curl \
     wget \
-    unzip \
-    make \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
-    gfortran \
-    libreadline-dev \
-    libx11-dev \
-    libxt-dev \
-    xorg-dev \
-    libbz2-dev \
-    liblzma-dev \
-    && rm -rf /var/lib/apt/lists/*
+    libz-dev \
+    r-base \
+    && apt-get clean
 
-# Téléchargement et extraction du code source de R
-RUN wget https://cran.r-project.org/src/base/R-3/R-3.4.1.tar.gz && \
-    tar -xzvf R-3.4.1.tar.gz
+# Téléchargement de DESeq2 1.16.1
+RUN wget http://launchpadlibrarian.net/330975418/r-bioc-deseq2_1.16.1-1_amd64.deb && \
+    dpkg -i r-bioc-deseq2_1.16.1-1_amd64.deb || apt-get -f install -y && \
+    rm r-bioc-deseq2_1.16.1-1_amd64.deb
 
-# Compilation et installation de R
-RUN cd R-3.4.1 && \
-    ./configure && \
-    make && \
-    make install
+# Définir le répertoire de travail
+WORKDIR /workspace
 
+# Commande par défaut pour lancer R
+CMD ["R"]
 
-# Installation de BiocManager et du package 'remotes' nécessaire pour BiocArchive
-
-RUN R -e "install.packages('rlang', repos='https://cloud.r-project.org')" && \
-    R -e "install.packages('memoise', repos='https://cloud.r-project.org')" && \
-    R -e "install.packages('rvest', repos='https://cloud.r-project.org')" && \
-    R -e "install.packages('xml2', repos='https://cloud.r-project.org')" && \
-    R -e "install.packages('cachem', repos='https://cloud.r-project.org')"
-
-
-
-RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org')" &&>    R -e "install.packages('remotes', repos='https://cloud.r-project.org')" && \
-    R -e "BiocManager::install('Bioconductor/BiocArchive', ask=FALSE)"
-
-
-# Commande d'entrée par défaut
-CMD ["/bin/bash"]
+# Pour créer l'image docker
+# docker build -f r-docker -t r-docker .
