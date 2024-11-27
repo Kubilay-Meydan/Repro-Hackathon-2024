@@ -6,9 +6,14 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     wget \
     unzip \
-    && rm -rf /var/lib/apt/lists/*
+    libncurses5 \
+    libncurses5-dev \
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev && \ 
+    rm -rf /var/lib/apt/lists/*
 
-# Télécharger Bowtie depuis sourceforge
+# Télécharger Bowtie depuis Sourceforge
 RUN wget --timeout=180 -O bowtie-0.12.7-linux-x86_64.zip https://sourceforge.net/projects/bowtie-bio/files/bowtie/0.12.7/bowtie-0.12.7-linux-x86_64.zip/download
 
 # Décompresser, déplacer et lier les exécutables dans le PATH
@@ -20,8 +25,17 @@ RUN unzip bowtie-0.12.7-linux-x86_64.zip && \
 # Ajouter Bowtie au PATH
 ENV PATH="/bowtie-0.12.7:${PATH}"
 
-# Vérification de l'installation de Bowtie et Bowtie-build
-RUN bowtie --version && bowtie-build --version
+# Télécharger, compiler et installer samtools
+RUN wget https://github.com/samtools/samtools/releases/download/1.11/samtools-1.11.tar.bz2 && \
+    tar -xjf samtools-1.11.tar.bz2 && \
+    cd samtools-1.11 && \
+    ./configure && \
+    make && \
+    make install && \
+    cd .. && rm -rf samtools-1.11*
+
+# Vérification des installations de Bowtie et Samtools
+RUN bowtie --version && samtools --version
 
 # Commande d'entrée par défaut
 CMD ["/bin/bash"]

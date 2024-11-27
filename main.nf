@@ -31,7 +31,8 @@ workflow {
     genome_annot = dwnldAnnotationGTF()
 
     // Map files to featureCount
-    feature_count_results = featureCount(mapped_files, genome_annot)
+    // feature_count_results = featureCount(mapped_files, genome_annot)
+    all_feature_count = featureCount(mapped_files.collect(), genome_annot)
 }
 
 // Process to download and gzip FASTQ files using SRA Toolkit
@@ -93,7 +94,7 @@ process downloadGenome {
 
 // New process to index genome using Bowtie
 process indexGenome {
-   container 'bowtie-docker'
+   container 'kubilaymeydan/bowtie-docker:latest'
 
    input:
    path genome_fasta
@@ -110,19 +111,19 @@ process indexGenome {
 
 
 process mapReads {
-   container 'bowtie-docker'
+   container 'kubilaymeydan/bowtie-docker:latest'
 
    input:
    tuple val(name), path(indexed_genome_dir) // Chemin du dossier contenant les fichiers d'index (bowtie_index)
    path trimmed_files
 
    output:
-   path "mapped_reads/${trimmed_files.baseName}.sam"
+   path "mapped_reads/${trimmed_files.baseName}.bam"
 
    script:
    """
    mkdir -p mapped_reads
-   zcat ${trimmed_files} | bowtie -q ${indexed_genome_dir}/${name} -p ${task.cpus} --sam - > mapped_reads/${trimmed_files.baseName}.sam
+   zcat ${trimmed_files} | bowtie -q ${indexed_genome_dir}/${name} -p ${task.cpus} --sam - | samtools view -bS - > mapped_reads/${trimmed_files.baseName}.bam   
    """
 }
 
@@ -143,15 +144,16 @@ process featureCount {
     container 'kubilaymeydan/subreads-docker:latest'
 
     input:
-    path mapped_file
+    path mapped_files
     path genome_annot
 
     output:
-    path "featurecount_files/${mapped_file.baseName}.txt"
+    path "featurecount_files/merged_feature_counts.txt"
 
     script:
     """
     mkdir -p featurecount_files
-    featureCounts -t gene -g gene_id -s 1 -a ${genome_annot} -o featurecount_files/${mapped_file.baseName}.txt ${mapped_file}
+    featureCounts -t gene -g gene_id -s 1 -a ${genome_annot} -o featurecount_files/merged_feature_counts.txt ${mapped_files.join(' ')}
     """
 }
+
