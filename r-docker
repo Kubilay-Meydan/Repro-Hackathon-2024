@@ -18,7 +18,7 @@ RUN apt-get update && \
     && apt-get clean
 
 # Téléchargement de DESeq2 1.16.1
-RUN wget http://launchpadlibrarian.net/330975418/r-bioc-deseq2_1.16.1-1_amd64.deb && \
+RUN wget https://launchpad.net/ubuntu/+source/r-bioc-deseq2/1.16.1-1/+build/13661603/+files/r-bioc-deseq2_1.16.1-1_amd64.deb && \
     dpkg -i r-bioc-deseq2_1.16.1-1_amd64.deb || apt-get -f install -y && \
     rm r-bioc-deseq2_1.16.1-1_amd64.deb
 
