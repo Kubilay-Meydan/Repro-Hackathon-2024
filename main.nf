@@ -111,7 +111,7 @@ process indexGenome {
 
 
 process mapReads {
-   container 'kubilaymeydan/bowtie-docker:latest'
+   container 'kubilaymeydan/bowtie-docker:2.0'
 
    input:
    tuple val(name), path(indexed_genome_dir) // Chemin du dossier contenant les fichiers d'index (bowtie_index)
