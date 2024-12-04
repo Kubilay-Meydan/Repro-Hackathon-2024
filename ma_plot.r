@@ -14,9 +14,9 @@ metadata <- data.frame(
              "SRR10379725.fastq_trimmed.fastq.bam", "SRR10379724.fastq_trimmed.fastq.bam", "SRR10379721.fastq_trimmed.fastq.bam"),
   Condition = c("control", "persister", "persister", "control", "control", "persister")
 )
-write.csv(metadata, "metadata.csv", row.names = FALSE)
+#write.csv(metadata, "metadata.csv", row.names = FALSE)
 
-metadata <- read.csv("metadata.csv", row.names = 1)
+#metadata <- read.csv("metadata.csv", row.names = 1)
 rownames(metadata) <- colnames(clean_count_data)
 metadata$Condition <- factor(metadata$Condition, levels = c("control", "persister"))
 
@@ -38,7 +38,7 @@ res <- results(dds)
 summary(res)
 
 pdf("MA_plot.pdf")
-plotMA(res, main = "MA plot",ylab = "Log2 Fold Change",xlab ="Mean of normalized counts", ylim = c(-5, 5), colSig = "red", colNonSig = "black", colLine = NA, xlim = c(1e-01, 1e+06), log = "x")
+plotMA(res, main = "MA plot",ylab = "Log2 Fold Change",xlab ="Mean of normalized counts", ylim = c(-4.5, 4.5), colSig = "red", colNonSig = "black", colLine = NA, xlim = c(1e-01, 1e+06), log = "x")
 # colLine en NA pour l'enlever et mettre celle en pointillée avec abline
 
 abline(h = 0, col = "black", lty = 2)
