@@ -3,36 +3,20 @@ nextflow.enable.dsl=2
 
 // Define a list of SRR numbers to download
 workflow {
-    // List of SRR IDs as a channel
     def SRR_LIST = Channel.of("SRR10379721", "SRR10379722", "SRR10379723", "SRR10379724", "SRR10379725", "SRR10379726")
-
-    // Run downloadFastq and store output in fastq_files channel
+    
     fastq_files = downloadFastq(SRR_LIST)
-
-    // Pass fastq_files to trimReads
     trimmed_files = trimReads(fastq_files)
-
-    // Display or save trimmed files as needed
-    trimmed_files.view()
-
-    // Run downloadGenome process
     genome_fasta = downloadGenome()
-
-    // Run indexGenome process with genome_fasta as input
-    indexed_genome_dir = indexGenome(genome_fasta)  // Récupère le dossier de sortie d'index
-
-    // Mapping des lectures avec les fichiers indexés et trimmed
+    indexed_genome_dir = indexGenome(genome_fasta)
     mapped_files = mapReads(indexed_genome_dir, trimmed_files)
-
-    // Afficher les fichiers d'alignement générés
-    mapped_files.view()
-
-    // Download genome annotation
     genome_annot = dwnldAnnotationGTF()
+    feature_count_results = featureCount(mapped_files.collect(), genome_annot)
 
-    // Map files to featureCount
-    // feature_count_results = featureCount(mapped_files, genome_annot)
-    all_feature_count = featureCount(mapped_files.collect(), genome_annot)
+
+    // Generate the MA plot dynamically
+    ma_plot = generateMAPlot(feature_count_results)
+    ma_plot.view()
 }
 
 // Process to download and gzip FASTQ files using SRA Toolkit
@@ -156,4 +140,23 @@ process featureCount {
     featureCounts -t gene -g gene_id -s 1 -a ${genome_annot} -o featurecount_files/merged_feature_counts.txt ${mapped_files.join(' ')}
     """
 }
+
+process generateMAPlot {
+    container 'r-docker:latest'
+
+    input:
+    path feature_counts
+
+    output:
+    path "MA_plot.pdf"
+
+    script:
+    """
+    Rscript --vanilla /workspace/ma_plot.r ${feature_counts}
+    """
+}
+
+
+
+
 
