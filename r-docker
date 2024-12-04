@@ -1,10 +1,10 @@
-# Utiliser la bonne version de ubuntu
-FROM ubuntu:18.04
+# Utiliser la bonne version de Ubuntu
+FROM rocker/r-ver:latest
 
-#Eviter les interactions lors de l'installation
+# Eviter les interactions lors de l'installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Installation des dependences et de R
+# Installation des dépendances et de R
 RUN apt-get update && \
     apt-get install -y \
     software-properties-common \
@@ -14,19 +14,21 @@ RUN apt-get update && \
     libssl-dev \
     libxml2-dev \
     libz-dev \
-    r-base \
     && apt-get clean
 
-# Téléchargement de DESeq2 1.16.1
-RUN wget https://launchpad.net/ubuntu/+source/r-bioc-deseq2/1.16.1-1/+build/13661603/+files/r-bioc-deseq2_1.16.1-1_amd64.deb && \
-    dpkg -i r-bioc-deseq2_1.16.1-1_amd64.deb || apt-get -f install -y && \
-    rm r-bioc-deseq2_1.16.1-1_amd64.deb
+# Installation de BiocManager et DESeq2 dans R
+RUN R -e "install.packages('BiocManager')" && \
+    R -e "BiocManager::install('DESeq2')"
 
 # Définir le répertoire de travail
 WORKDIR /workspace
 
+# Copier les scripts R et les métadonnées dans le conteneur
+COPY ma_plot.r /workspace/ma_plot.r
+
+# Commenté si ça marche avec la création du metadata dans le script R
+#COPY metadata.csv /workspace/metadata.csv
+
 # Commande par défaut pour lancer R
 CMD ["R"]
 
-# Pour créer l'image docker
-# docker build -f r-docker -t r-docker .
