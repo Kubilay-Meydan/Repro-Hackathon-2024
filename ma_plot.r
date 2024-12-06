@@ -1,4 +1,5 @@
 library(DESeq2)
+library(ggplot2)
 packageVersion("DESeq2")
 
 
@@ -37,9 +38,65 @@ dds <- DESeq(dds)
 res <- results(dds)
 summary(res)
 
-pdf("MA_plot.pdf")
-plotMA(res, main = "MA plot",ylab = "Log2 Fold Change",xlab ="Mean of normalized counts", ylim = c(-4.5, 4.5), colSig = "red", colNonSig = "black", colLine = NA, xlim = c(1e-01, 1e+06), log = "x")
-# colLine en NA pour l'enlever et mettre celle en pointillée avec abline
-
-abline(h = 0, col = "black", lty = 2)
+# Vérification de la distribution des pvalues ajustées
+png("Hist_pvalAdj.png", width = 800, height = 600, res = 300)
+hist(res$padj)
 dev.off()
+
+
+##### MA-PLOT complete dataset
+
+res_df <- as.data.frame(res)
+# Identification des gènes différentiellements exprimés
+res_df$Significance <- ifelse(res_df$padj < 0.05 & !is.na(res_df$padj), "Significant", "Not Significant")
+
+# Représentation sous forme de MA-plot
+plot <- ggplot(res_df, aes(x = baseMean, y = log2FoldChange, color = Significance)) +
+  geom_point(size = 1.2, alpha = 0.5) +  # Points (gènes)
+  scale_color_manual(values = c("Significant" = "red", "Not Significant" = "black"),
+                     guide = "none") +  # Couleurs
+  scale_x_log10(breaks = c(10^0, 10^2, 10^4),  # Axe des abscisses
+                labels = c(expression(10^0), expression(10^2), expression(10^4))) +  # Labels
+  coord_cartesian(ylim = c(-4, 4)) +  # Axe des ordonnées
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") +  # Ligne horizontale
+  theme_gray(base_size = 14) +  # Grille de fond et taille du texte
+  labs(title = "MA-plot of complete RNA-seq dataset",
+      x = "Mean of normalized counts",
+      y = "Log2 Fold Change") +
+  theme(panel.grid.major = element_line(color = "white"),  # Grille majeure
+      panel.grid.minor = element_line(color = "white"),  # Grille mineure
+      legend.position = "top")
+
+ggsave("plot_complete_dataset.png", plot = plot)
+
+##### Volcano-plot complete dataset
+
+res_df <- as.data.frame(res)
+res_df$gene <- rownames(res_df)
+
+# Catégoriser les gènes en fonction de leur régulation
+res_df$Regulation <- "No Change"
+res_df$Regulation[res_df$log2FoldChange > 0 & res_df$padj < 0.05] <- "Up-regulated"
+res_df$Regulation[res_df$log2FoldChange < 0 & res_df$padj < 0.05] <- "Down-regulated"
+
+# Significativité des pvalues ajustées
+res_df$Significance <- "Not significant"
+res_df$Significance[res_df$padj < 0.05 & abs(res_df$log2FoldChange) > 1] <- "Significant"
+
+# Volcanon plot
+volcano_plot <- ggplot(res_df, aes(x = log2FoldChange, y = -log10(padj), color = Regulation)) +
+  geom_point(alpha = 0.7, size = 2) +
+  scale_color_manual(values = c("red","gray","blue")) +
+  geom_vline(xintercept = c(-1, 1), linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dashed", color = "black") +
+  labs(title = "Volcano Plot of complete dataset", x = "Log2 Fold Change", y = "-Log10 Adjusted p-value") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+ggsave("volcano_plot.png", plot = volcano_plot)
+
+
+
+
+
+

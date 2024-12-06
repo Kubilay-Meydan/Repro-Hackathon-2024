@@ -164,14 +164,14 @@ metadata <- data.frame(
              "SRR10379724.fastq_trimmed.fastq.bam", "SRR10379721.fastq_trimmed.fastq.bam"),
   Condition = c("control", "persister", "persister", "control", "control", "persister")
 )
-write.csv(metadata, "metadata.csv", row.names = FALSE)
+#write.csv(metadata, "metadata.csv", row.names = FALSE)
 
 # Chargement des données de comptage
 counts_file <- "Translation_feature_counts.tsv"
 counts_data <- read.delim(counts_file, header = TRUE, row.names = 1)
 
 # Lecture des métadonnées
-metadata <- read.csv("metadata.csv")
+#metadata <- read.csv("metadata.csv")
 
 # Nettoyage des données de comptage pour ne garder que les colonnes pertinentes
 clean_count_data <- counts_data[, c(6:11)]
