@@ -18,17 +18,23 @@ RUN apt-get update && \
 
 # Installation de BiocManager et DESeq2 dans R
 RUN R -e "install.packages('BiocManager')" && \
-    R -e "BiocManager::install('DESeq2')"
+    R -e "BiocManager::install('DESeq2')" && \
+    R -e "install.packages('ggplot2')"
 
 # Définir le répertoire de travail
 WORKDIR /workspace
 
 # Copier les scripts R et les métadonnées dans le conteneur
 COPY ma_plot.r /workspace/ma_plot.r
+COPY diff_gene_plot.r /workspace/diff_gene_plot.r
+
 
 # Commenté si ça marche avec la création du metadata dans le script R
 #COPY metadata.csv /workspace/metadata.csv
 
 # Commande par défaut pour lancer R
 CMD ["R"]
+
+#docker build -t r-docker -f r-docker .
+
 

@@ -14,9 +14,16 @@ workflow {
     feature_count_results = featureCount(mapped_files.collect(), genome_annot)
 
 
+    //ajouter le fichier local comme entrée
+    gene_info_file = file("GeneSpecificInformation_NCTC8325.tsv")
+
+     //geneDiffplot added : 
+    de_results = diffGenePlot(feature_count_results, gene_info_file)
+
     // Generate the MA plot dynamically
     ma_plot = generateMAPlot(feature_count_results)
     ma_plot.view()
+
 }
 
 // Process to download and gzip FASTQ files using SRA Toolkit
@@ -153,6 +160,24 @@ process generateMAPlot {
     script:
     """
     Rscript --vanilla /workspace/ma_plot.r ${feature_counts}
+    """
+}
+
+
+process diffGenePlot {
+    container 'r-docker:latest'
+
+    input:
+    path feature_counts
+    path gene_info_file
+
+    output:
+    path "DE_results/"
+
+    script:
+    """
+    mkdir -p DE_results
+    Rscript --vanilla /workspace/diff_gene_plot.r ${feature_counts} ${gene_info_file} DE_results/
     """
 }
 
