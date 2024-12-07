@@ -38,17 +38,6 @@ dds <- DESeq(dds)
 res <- results(dds)
 summary(res)
 
-# Ajouter les noms des lignes comme une colonne appelée "Gene"
-#res$Geneid <- rownames(res)
-
-# Réorganiser les colonnes pour que "Gene" soit la première colonne
-#res <- res[, c("Geneid", setdiff(names(res), "Geneid"))]
-
-# Écrire le fichier CSV
-#write.csv(res, "DESeq2_results.csv", row.names = FALSE)
-
-#res <- results(dds)
-
 # Vérification de la distribution des pvalues ajustées
 png("Hist_pvalAdj.png", width = 800, height = 600, res = 300)
 hist(res$padj)
