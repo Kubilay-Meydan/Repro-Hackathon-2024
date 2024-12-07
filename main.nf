@@ -22,7 +22,7 @@ workflow {
 
     // Generate the MA plot dynamically
     ma_plot = generateMAPlot(feature_count_results)
-    ma_plot.view()
+    // ma_plot.view()
 
 }
 
@@ -141,6 +141,8 @@ process featureCount {
     output:
     path "featurecount_files/merged_feature_counts.txt"
 
+    publishDir "${baseDir}/results", mode: 'copy'
+
     script:
     """
     mkdir -p featurecount_files
@@ -157,6 +159,8 @@ process generateMAPlot {
     output:
     path "MA_plot.pdf"
 
+    publishDir "${baseDir}/results", mode: 'copy' 
+
     script:
     """
     Rscript --vanilla /workspace/ma_plot.r ${feature_counts}
@@ -172,12 +176,14 @@ process diffGenePlot {
     path gene_info_file
 
     output:
-    path "DE_results/"
+    path "plot_translation.png"
+
+    publishDir "${baseDir}/results", mode: 'copy'
+    
 
     script:
     """
-    mkdir -p DE_results
-    Rscript --vanilla /workspace/diff_gene_plot.r ${feature_counts} ${gene_info_file} DE_results/
+    Rscript --vanilla /workspace/diff_gene_plot.r ${feature_counts} ${gene_info_file} 
     """
 }
 
