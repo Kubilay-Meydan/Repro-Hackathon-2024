@@ -107,7 +107,7 @@ percent_variance <- round(100 * attr(pca_data, "percentVar"))
 # Modifier les noms des échantillons (couper avant le ".")
 pca_data$name <- sapply(pca_data$name, function(x) strsplit(x, "\\.")[[1]][1])
 
-plot <- ggplot(pca_data, aes(x = PC1, y = PC2, color = Condition, label = name)) +
+ACP <- ggplot(pca_data, aes(x = PC1, y = PC2, color = Condition, label = name)) +
                 geom_point(size = 4, alpha = 0.8) +                     
                 geom_text(vjust = -1, hjust = 0.5, size = 3) +         
                 labs(title = "Principal Component Analysis of samples (PCA)", x = paste0("PC1: ", percent_variance[1], "% variance"),  
