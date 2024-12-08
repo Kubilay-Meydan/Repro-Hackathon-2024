@@ -70,8 +70,8 @@ Nextflow run main.nf
 This project was developed by:
 - [Kubilay Meydan](https://github.com/Kubilay-Meydan)
 - [Nathan Carré](https://github.com/Nathan-Carre)
-- [Youna Maillé](https://github.com/YounaMKr)
-- [Emma Le Roi Pardonche](https://github.com/emmaleroyp)
+- [Youna Maillié](https://github.com/YounaMKr)
+- [Emma Le Roy Pardonche](https://github.com/emmaleroyp)
 
 ## 🗨️ Contacts <a name="contacts"></a>
 
