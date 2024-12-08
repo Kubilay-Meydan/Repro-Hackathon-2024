@@ -157,10 +157,8 @@ process generateMAPlot {
     path feature_counts
 
     output:
-    path "Hist_pvalAdj.pdf"
-    path "MA_plot_complete_dataset.png"
-    path "Volcano_plot.pdf"
-    path "ACP_samples.png"
+    path "*.pdf"
+    path "*.png"
 
     publishDir "${baseDir}/results", mode: 'copy' 
 
