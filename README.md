@@ -18,7 +18,7 @@
                                                                                    
 [![Nextflow Version](https://img.shields.io/badge/Nextflow-24.10-brightgreen)](https://www.nextflow.io)
 [![Docker Version](https://img.shields.io/badge/Docker-20.10.21-blue)](https://www.docker.com)
-[![R Version](https://img.shields.io/badge/R-3.4.1-darkblue)](https://www.r-project.org/)
+[![R Version](https://img.shields.io/badge/R-4.4.2-darkblue)](https://www.r-project.org/)
 [![Bowtie Version](https://img.shields.io/badge/Bowtie-0.12.7-green)](http://bowtie-bio.sourceforge.net/index.shtml)
 [![DESeq2 Version](https://img.shields.io/badge/DESeq2-1.46.0-red)](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
 [![SRA Toolkit Version](https://img.shields.io/badge/SRA%20Toolkit-3.1.1-lightgreen)](https://github.com/ncbi/sra-tools)
