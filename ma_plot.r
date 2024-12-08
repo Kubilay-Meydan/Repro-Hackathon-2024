@@ -35,9 +35,14 @@ res <- results(dds)
 summary(res)
 
 # Vérification de la distribution des pvalues ajustées
-pdf("Hist_pvalAdj.pdf")
-hist(res$padj, main = "Histogram of adjusted p-values")
-dev.off()
+hist_plot <- ggplot(as.data.frame(res$padj), aes(x = res$padj)) +
+  geom_histogram(bins = 30, fill = "blue", color = "black", alpha = 0.7) +
+  theme_minimal() +
+  labs(title = "Histogram of Adjusted p-values",
+       x = "Adjusted p-value",
+       y = "Frequency")
+
+ggsave("Hist_pvalAdj.pdf", plot = hist_plot, width = 7, height = 8)
 
 
 ##### MA-PLOT complete dataset

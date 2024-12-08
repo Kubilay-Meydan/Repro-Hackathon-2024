@@ -151,7 +151,7 @@ process featureCount {
 }
 
 process generateMAPlot {
-    container 'kubilaymeydan/r-docker:latest'
+    container 'r-docker:latest'
 
     input:
     path feature_counts
@@ -172,7 +172,7 @@ process generateMAPlot {
 
 
 process diffGenePlot {
-    container 'kubilaymeydan/r-docker:latest'
+    container 'r-docker:latest'
 
     input:
     path feature_counts
